@@ -1,0 +1,16 @@
+Changes
+MANIFEST
+META.yml # Will be created by "make dist"
+Makefile.PL
+README
+lib/CatalystX/CRUD/Model/RDBO.pm
+lib/CatalystX/CRUD/Object/RDBO.pm
+t/00-load.t
+t/01-rdbo.t
+t/boilerplate.t
+t/pod-coverage.t
+t/pod.t
+t/lib/My/Foo.pm
+t/lib/MyApp.pm
+t/lib/MyApp/Model/Foo.pm
+t/lib/MyApp/Object.pm
