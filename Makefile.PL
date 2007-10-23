@@ -14,6 +14,8 @@ WriteMakefile(
         'Rose::DB::Object' => 0,
         'CatalystX::CRUD'  => 0,
         'Catalyst::Runtime' => 0,
+        'Sort::SQL'         => 0,
+
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'CatalystX-CRUD-Model-RDBO-*' },

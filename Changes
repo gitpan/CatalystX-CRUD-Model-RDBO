@@ -3,3 +3,8 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.01    20 Oct 2007
         First version, released on an unsuspecting world.
 
+0.02    23 Oct 2007
+        * fix typo in POD that fooled CPAN into forking separate doc file
+        * added Sort::SQL to prereq list
+
+

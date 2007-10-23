@@ -5,7 +5,7 @@ use base qw( CatalystX::CRUD::Model );
 use CatalystX::CRUD::Iterator;
 use Sort::SQL;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
@@ -16,7 +16,7 @@ __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
 
 =head1 NAME
 
-CataystX::CRUD::Model::RDBO - Rose::DB::Object CRUD
+CatalystX::CRUD::Model::RDBO - Rose::DB::Object CRUD
 
 =head1 SYNOPSIS
 
