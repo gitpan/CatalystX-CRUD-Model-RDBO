@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         CatalystX-CRUD-Model-RDBO
-version:      0.02
+version:      0.03
 version_from: lib/CatalystX/CRUD/Model/RDBO.pm
 installdirs:  site
 requires:
@@ -9,6 +9,7 @@ requires:
     CatalystX::CRUD:               0
     Data::Dump:                    0
     Rose::DB::Object:              0
+    Rose::DBx::TestDB:             0
     Sort::SQL:                     0
     Test::More:                    0
 

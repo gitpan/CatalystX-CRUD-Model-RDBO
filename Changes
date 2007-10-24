@@ -7,4 +7,8 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * fix typo in POD that fooled CPAN into forking separate doc file
         * added Sort::SQL to prereq list
 
+0.03    23 Oct 2007
+        * added Rose::DBx::TestDB to the prereq list
+
+
 

@@ -15,6 +15,7 @@ WriteMakefile(
         'CatalystX::CRUD'  => 0,
         'Catalyst::Runtime' => 0,
         'Sort::SQL'         => 0,
+        'Rose::DBx::TestDB' => 0,
 
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
