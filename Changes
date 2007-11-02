@@ -10,5 +10,11 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.03    23 Oct 2007
         * added Rose::DBx::TestDB to the prereq list
 
+0.04    1 November 2007
+        * RDBO Debug var set if CATALYST_DEBUG env var is true
+        * test for defined() param() values
+        * change reserved param names to start with _
+        * fix search() wantarray bug
+
 
 

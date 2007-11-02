@@ -5,14 +5,16 @@ use base qw( CatalystX::CRUD::Model );
 use CatalystX::CRUD::Iterator;
 use Sort::SQL;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
 
-# uncomment these to see the SQL print on stderr
-#$Rose::DB::Object::QueryBuilder::Debug = 1;
-#$Rose::DB::Object::Debug = 1;
+if ($ENV{CATALYST_DEBUG})
+{
+    $Rose::DB::Object::QueryBuilder::Debug = 1;
+    $Rose::DB::Object::Debug = 1;
+}
 
 =head1 NAME
 
@@ -210,7 +212,7 @@ sub search {
     my $class = $self->object_class;
 
     my @wrapped = map { $class->new( delegate => $_ ) } @$objs;
-    return wantarray ? \@wrapped : @wrapped;
+    return wantarray ? @wrapped : \@wrapped;
 }
 
 =head2 count( @params )
@@ -255,17 +257,17 @@ The following reserved request param names are implemented:
 
 =over
 
-=item order
+=item _order
 
 Sort order. Should be a SQL-friendly string parse-able by Sort::SQL.
 
-=item page_size
+=item _page_size
 
 For the Data::Pageset pager object. Defaults to page_size(). An upper limit of 200
 is implemented by default to reduce the risk of a user [unwittingly] creating a denial
 of service situation.
 
-=item page
+=item _page
 
 What page the current request is coming from. Used to set the offset value
 in the query. Defaults to C<1>.
@@ -280,7 +282,7 @@ sub make_query {
     my $field_names = shift or $self->throw_error("field_names required");
 
     my $roseq = $self->_rose_query($field_names);
-    my $s     = $c->req->param('order') || 'id DESC';
+    my $s     = $c->req->param('_order') || 'id DESC';
     my $sp    = Sort::SQL->string2array($s);
 
     # dis-ambiguate common column names
@@ -290,9 +292,9 @@ sub make_query {
     # Rose requires ASC/DESC be UPPER case
     $s =~ s,\b(asc|desc)\b,uc($1),eg;
 
-    my $page_size = $c->request->param('page_size') || $self->page_size;
+    my $page_size = $c->request->param('_page_size') || $self->page_size;
     $page_size = 200 if $page_size > 200;    # don't let users DoS us.
-    my $page = $c->req->param('page') || 1;
+    my $page = $c->req->param('_page') || 1;
 
     my %query = (
         query           => $roseq->{sql},
@@ -335,7 +337,7 @@ sub _rose_query {
         next unless exists $c->req->params->{$p};
         my @v    = $c->req->param($p);
         my @safe = @v;
-        next unless grep {/./} @safe;
+        next unless grep {defined && m/./} @safe;
 
         $query{$p} = \@v;
 
