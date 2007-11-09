@@ -5,15 +5,14 @@ use base qw( CatalystX::CRUD::Model );
 use CatalystX::CRUD::Iterator;
 use Sort::SQL;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
 
-if ($ENV{CATALYST_DEBUG})
-{
+if ( $ENV{CATALYST_DEBUG} ) {
     $Rose::DB::Object::QueryBuilder::Debug = 1;
-    $Rose::DB::Object::Debug = 1;
+    $Rose::DB::Object::Debug               = 1;
 }
 
 =head1 NAME
@@ -261,6 +260,14 @@ The following reserved request param names are implemented:
 
 Sort order. Should be a SQL-friendly string parse-able by Sort::SQL.
 
+=item _sort
+
+Instead of _order, can pass one column name to sort by.
+
+=item _dir
+
+With _sort, pass the direction in which to sort.
+
 =item _page_size
 
 For the Data::Pageset pager object. Defaults to page_size(). An upper limit of 200
@@ -272,18 +279,41 @@ of service situation.
 What page the current request is coming from. Used to set the offset value
 in the query. Defaults to C<1>.
 
+=item _offset
+
+Pass explicit row to offset from in query. If not present, deduced from
+_page and _page_size.
+
 =back
 
 =cut
 
+sub _get_field_names {
+    my $self = shift;
+    return $self->{_field_names} if $self->{_field_names};
+    my @cols = $self->name->meta->column_names;
+    $self->{_field_names} = \@cols;
+    return \@cols;
+}
+
 sub make_query {
     my $self        = shift;
     my $c           = $self->context;
-    my $field_names = shift or $self->throw_error("field_names required");
+    my $field_names = shift || $self->_get_field_names;
 
     my $roseq = $self->_rose_query($field_names);
-    my $s     = $c->req->param('_order') || 'id DESC';
-    my $sp    = Sort::SQL->string2array($s);
+    my $s     = $c->req->param('_order')
+        || join( ' ', $c->req->param('_sort'), $c->req->param('_dir') )
+        || 'id DESC';
+    my $sp        = Sort::SQL->string2array($s);
+    my $offset    = $c->req->param('_offset');
+    my $page_size = $c->request->param('_page_size') || $self->page_size;
+    $page_size = 200 if $page_size > 200;    # don't let users DoS us.
+    my $page = $c->req->param('_page') || 1;
+
+    if ( !defined($offset) ) {
+        $offset = ( $page - 1 ) * $page_size;
+    }
 
     # dis-ambiguate common column names
     $s =~ s,\bname\ ,t1.name ,;
@@ -292,15 +322,11 @@ sub make_query {
     # Rose requires ASC/DESC be UPPER case
     $s =~ s,\b(asc|desc)\b,uc($1),eg;
 
-    my $page_size = $c->request->param('_page_size') || $self->page_size;
-    $page_size = 200 if $page_size > 200;    # don't let users DoS us.
-    my $page = $c->req->param('_page') || 1;
-
     my %query = (
         query           => $roseq->{sql},
         sort_by         => $s,
         limit           => $page_size,
-        offset          => ( $page - 1 ) * $page_size,
+        offset          => $offset,
         sort_order      => $sp,
         plain_query     => $roseq->{query},
         plain_query_str => $self->_plain_query_str( $roseq->{query} ),
@@ -337,7 +363,7 @@ sub _rose_query {
         next unless exists $c->req->params->{$p};
         my @v    = $c->req->param($p);
         my @safe = @v;
-        next unless grep {defined && m/./} @safe;
+        next unless grep { defined && m/./ } @safe;
 
         $query{$p} = \@v;
 

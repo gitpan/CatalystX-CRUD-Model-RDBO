@@ -1,6 +1,5 @@
 Changes
 MANIFEST
-META.yml # Will be created by "make dist"
 Makefile.PL
 README
 lib/CatalystX/CRUD/Model/RDBO.pm
@@ -14,3 +13,4 @@ t/lib/My/Foo.pm
 t/lib/MyApp.pm
 t/lib/MyApp/Model/Foo.pm
 t/lib/MyApp/Object.pm
+META.yml                                 Module meta-data (added by MakeMaker)

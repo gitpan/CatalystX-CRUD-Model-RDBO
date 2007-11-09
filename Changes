@@ -16,5 +16,10 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * change reserved param names to start with _
         * fix search() wantarray bug
 
+0.05    9 November 2007
+        * add method to get default available field names in make_query()
+        * allow for explicit _offset param as well as individual _sort and _dir params
+
+
 
 
