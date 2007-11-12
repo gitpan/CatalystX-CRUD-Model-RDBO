@@ -5,15 +5,10 @@ use base qw( CatalystX::CRUD::Model );
 use CatalystX::CRUD::Iterator;
 use Sort::SQL;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
-
-if ( $ENV{CATALYST_DEBUG} ) {
-    $Rose::DB::Object::QueryBuilder::Debug = 1;
-    $Rose::DB::Object::Debug               = 1;
-}
 
 =head1 NAME
 
@@ -97,6 +92,12 @@ sub Xsetup {
         $self->{manager} = 'Rose::DB::Object::Manager';
         require Rose::DB::Object::Manager;
     }
+
+    if ( $ENV{CATALYST_DEBUG} ) {
+        $Rose::DB::Object::QueryBuilder::Debug = 1;
+        $Rose::DB::Object::Debug               = 1;
+    }
+
 }
 
 =head2 new_object( @param )

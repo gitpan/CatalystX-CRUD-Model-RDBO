@@ -20,6 +20,9 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * add method to get default available field names in make_query()
         * allow for explicit _offset param as well as individual _sort and _dir params
 
+0.06    12 Nov 2007
+        * RDBO Debug var set if CATALYST_DEBUG env var is true -- moved to Xsetup() so it actually works.
+
 
 
 
