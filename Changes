@@ -23,6 +23,10 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.06    12 Nov 2007
         * RDBO Debug var set if CATALYST_DEBUG env var is true -- moved to Xsetup() so it actually works.
 
+0.07    20 Nov 2007
+        * auto-discovery of PK to set a real column for default ORDER BY sorting in make_query()
+
+
 
 
 

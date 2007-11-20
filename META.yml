@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                CatalystX-CRUD-Model-RDBO
-version:             0.06
+version:             0.07
 abstract:            ~
 license:             ~
 generated_by:        ExtUtils::MakeMaker version 6.36

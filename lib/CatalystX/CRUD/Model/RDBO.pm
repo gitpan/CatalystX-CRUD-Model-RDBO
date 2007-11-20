@@ -5,7 +5,7 @@ use base qw( CatalystX::CRUD::Model );
 use CatalystX::CRUD::Iterator;
 use Sort::SQL;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
@@ -85,6 +85,12 @@ sub Xsetup {
     my $db = $name->new->db;
     $self->{_db_driver} = $db->driver;
 
+    # what's the PK for the table? Need for default ORDER BY
+    # TODO only one PK column supported at present
+    my @pks = $name->meta->primary_key_column_names;
+    $self->{_pk} = $pks[0];
+
+    # load the Manager
     eval "require $mgr";
 
     # don't fret -- just use RDBO::Manager
@@ -93,6 +99,7 @@ sub Xsetup {
         require Rose::DB::Object::Manager;
     }
 
+    # turn on debugging help
     if ( $ENV{CATALYST_DEBUG} ) {
         $Rose::DB::Object::QueryBuilder::Debug = 1;
         $Rose::DB::Object::Debug               = 1;
@@ -305,7 +312,7 @@ sub make_query {
     my $roseq = $self->_rose_query($field_names);
     my $s     = $c->req->param('_order')
         || join( ' ', $c->req->param('_sort'), $c->req->param('_dir') )
-        || 'id DESC';
+        || ( $self->{_pk} . ' DESC' );
     my $sp        = Sort::SQL->string2array($s);
     my $offset    = $c->req->param('_offset');
     my $page_size = $c->request->param('_page_size') || $self->page_size;
