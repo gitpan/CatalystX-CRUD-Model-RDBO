@@ -1,17 +1,16 @@
 --- #YAML:1.0
 name:                CatalystX-CRUD-Model-RDBO
-version:             0.07
+version:             0.08
 abstract:            ~
 license:             ~
 generated_by:        ExtUtils::MakeMaker version 6.36
 distribution_type:   module
 requires:     
     Catalyst::Runtime:             0
-    CatalystX::CRUD:               0
+    CatalystX::CRUD:               0.18
     Data::Dump:                    0
     Rose::DB::Object:              0
     Rose::DBx::TestDB:             0
-    Sort::SQL:                     0
     Test::More:                    0
 meta-spec:
     url:     http://module-build.sourceforge.net/META-spec-v1.2.html

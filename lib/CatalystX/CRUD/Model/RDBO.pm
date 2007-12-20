@@ -1,11 +1,10 @@
 package CatalystX::CRUD::Model::RDBO;
 use strict;
 use warnings;
-use base qw( CatalystX::CRUD::Model );
+use base qw( CatalystX::CRUD::Model CatalystX::CRUD::Model::Utils );
 use CatalystX::CRUD::Iterator;
-use Sort::SQL;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
@@ -83,12 +82,10 @@ sub Xsetup {
 
     # what kind of db driver are we using. makes a difference in make_query().
     my $db = $name->new->db;
-    $self->{_db_driver} = $db->driver;
-
-    # what's the PK for the table? Need for default ORDER BY
-    # TODO only one PK column supported at present
-    my @pks = $name->meta->primary_key_column_names;
-    $self->{_pk} = $pks[0];
+    $self->use_ilike(1) if $db->driver eq 'pg';
+    
+# rdbo sql uses 'ne' for not equal
+    $self->ne_sign('ne');
 
     # load the Manager
     eval "require $mgr";
@@ -258,41 +255,7 @@ Implement a RDBO-specific query factory based on request parameters.
 Return value can be passed directly to search(), iterator() or count() as
 documented in the CatalystX::CRUD::Model API.
 
-I<field_names> should be an array of valid form field names.
-
-The following reserved request param names are implemented:
-
-=over
-
-=item _order
-
-Sort order. Should be a SQL-friendly string parse-able by Sort::SQL.
-
-=item _sort
-
-Instead of _order, can pass one column name to sort by.
-
-=item _dir
-
-With _sort, pass the direction in which to sort.
-
-=item _page_size
-
-For the Data::Pageset pager object. Defaults to page_size(). An upper limit of 200
-is implemented by default to reduce the risk of a user [unwittingly] creating a denial
-of service situation.
-
-=item _page
-
-What page the current request is coming from. Used to set the offset value
-in the query. Defaults to C<1>.
-
-=item _offset
-
-Pass explicit row to offset from in query. If not present, deduced from
-_page and _page_size.
-
-=back
+See CatalystX::CRUD::Model::Utils::make_sql_query() for API details.
 
 =cut
 
@@ -308,98 +271,13 @@ sub make_query {
     my $self        = shift;
     my $c           = $self->context;
     my $field_names = shift || $self->_get_field_names;
-
-    my $roseq = $self->_rose_query($field_names);
-    my $s     = $c->req->param('_order')
-        || join( ' ', $c->req->param('_sort'), $c->req->param('_dir') )
-        || ( $self->{_pk} . ' DESC' );
-    my $sp        = Sort::SQL->string2array($s);
-    my $offset    = $c->req->param('_offset');
-    my $page_size = $c->request->param('_page_size') || $self->page_size;
-    $page_size = 200 if $page_size > 200;    # don't let users DoS us.
-    my $page = $c->req->param('_page') || 1;
-
-    if ( !defined($offset) ) {
-        $offset = ( $page - 1 ) * $page_size;
-    }
+    my $q           = $self->make_sql_query($field_names);
 
     # dis-ambiguate common column names
-    $s =~ s,\bname\ ,t1.name ,;
-    $s =~ s,\bid\ ,t1.id ,;
+    $q->{sort_by} =~ s,\bname\ ,t1.name ,;
+    $q->{sort_by} =~ s,\bid\ ,t1.id ,;
 
-    # Rose requires ASC/DESC be UPPER case
-    $s =~ s,\b(asc|desc)\b,uc($1),eg;
-
-    my %query = (
-        query           => $roseq->{sql},
-        sort_by         => $s,
-        limit           => $page_size,
-        offset          => $offset,
-        sort_order      => $sp,
-        plain_query     => $roseq->{query},
-        plain_query_str => $self->_plain_query_str( $roseq->{query} ),
-    );
-
-    return \%query;
-}
-
-sub _plain_query_str {
-    my ( $self, $q ) = @_;
-    my @s;
-    for my $p ( sort keys %$q ) {
-        my @v = @{ $q->{$p} };
-        next unless grep {m/\S/} @v;
-        push( @s, "$p = " . join( ' or ', @v ) );
-    }
-    return join( ' AND ', @s );
-}
-
-# make a RDBO-compatible query
-sub _rose_query {
-    my ( $self, $field_names ) = @_;
-    my $c = $self->context;
-    my ( @sql, %query );
-
-    # LIKE syntax varies between db implementations
-    my $is_ilike = 0;
-    if ( $self->{_db_driver} eq 'pg' ) {
-        $is_ilike = 1;
-    }
-
-    for my $p (@$field_names) {
-
-        next unless exists $c->req->params->{$p};
-        my @v    = $c->req->param($p);
-        my @safe = @v;
-        next unless grep { defined && m/./ } @safe;
-
-        $query{$p} = \@v;
-
-        # normalize wildcards and set sql accordingly
-        if ( grep {/[\%\*]|^!/} @v ) {
-            grep {s/\*/\%/g} @safe;
-            my @wild = grep {m/\%/} @safe;
-            if (@wild) {
-                if ($is_ilike) {
-                    push( @sql, ( $p => { ilike => \@wild } ) );
-                }
-                else {
-                    push( @sql, ( $p => { like => \@wild } ) );
-                }
-            }
-
-            # allow for negation of query
-            my @not = grep {m/^!/} @safe;
-            if (@not) {
-                push( @sql, ( $p => { ne => [ grep {s/^!//} @not ] } ) );
-            }
-        }
-        else {
-            push( @sql, $p => [@safe] );
-        }
-    }
-
-    return { sql => \@sql, query => \%query };
+    return $q;
 }
 
 sub _get_objects {
