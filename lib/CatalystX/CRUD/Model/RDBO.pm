@@ -4,7 +4,7 @@ use warnings;
 use base qw( CatalystX::CRUD::Model CatalystX::CRUD::Model::Utils );
 use CatalystX::CRUD::Iterator;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
@@ -83,8 +83,8 @@ sub Xsetup {
     # what kind of db driver are we using. makes a difference in make_query().
     my $db = $name->new->db;
     $self->use_ilike(1) if $db->driver eq 'pg';
-    
-# rdbo sql uses 'ne' for not equal
+
+    # rdbo sql uses 'ne' for not equal
     $self->ne_sign('ne');
 
     # load the Manager
@@ -265,6 +265,29 @@ sub _get_field_names {
     my @cols = $self->name->meta->column_names;
     $self->{_field_names} = \@cols;
     return \@cols;
+}
+
+=head2 treat_like_int
+
+Returns hash ref of all column names that return type =~ m/^date(time)$/.
+This is so that wildcard searches for date and datetime-based columns
+will get proper SQL rendering.
+
+=cut
+
+sub treat_like_int {
+    my $self = shift;
+    return $self->{_treat_like_int} if $self->{_treat_like_int};
+    $self->{_treat_like_int} = {};
+    my $col_names = $self->_get_field_names;
+
+    # treat wildcard timestamps like ints not text (>= instead of ILIKE)
+    for my $name (@$col_names) {
+        my $col = $self->name->meta->column($name);
+        $self->{_treat_like_int}->{$name} = $col->type =~ m/^date(time)?$/;
+    }
+
+    return $self->{_treat_like_int};
 }
 
 sub make_query {

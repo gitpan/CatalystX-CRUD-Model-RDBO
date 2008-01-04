@@ -29,6 +29,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.08    20 Dec 2007
         * factor out sql generation into core CatalystX::CRUD::Model::Utils.
 
-
-
+0.09    04 Dec 2007
+        * add treat_like_int support
 
