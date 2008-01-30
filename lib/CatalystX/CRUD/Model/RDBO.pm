@@ -4,7 +4,7 @@ use warnings;
 use base qw( CatalystX::CRUD::Model CatalystX::CRUD::Model::Utils );
 use CatalystX::CRUD::Iterator;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
@@ -97,7 +97,7 @@ sub Xsetup {
     }
 
     # turn on debugging help
-    if ( $ENV{CATALYST_DEBUG} ) {
+    if ( $ENV{CATALYST_DEBUG} && $ENV{CATALYST_DEBUG} > 1 ) {
         $Rose::DB::Object::QueryBuilder::Debug = 1;
         $Rose::DB::Object::Debug               = 1;
     }

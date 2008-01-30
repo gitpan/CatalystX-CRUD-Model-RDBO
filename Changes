@@ -32,3 +32,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.09    04 Dec 2007
         * add treat_like_int support
 
+0.10    29 Jan 2008
+        * made RDBO debugging depedent on CATALYST_DEBUG > 1
+

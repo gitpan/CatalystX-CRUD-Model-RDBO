@@ -2,9 +2,8 @@ package CatalystX::CRUD::Object::RDBO;
 use strict;
 use warnings;
 use base qw( CatalystX::CRUD::Object );
-use Carp;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 NAME
 
