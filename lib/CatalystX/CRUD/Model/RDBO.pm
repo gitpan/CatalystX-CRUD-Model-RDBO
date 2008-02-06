@@ -4,7 +4,7 @@ use warnings;
 use base qw( CatalystX::CRUD::Model CatalystX::CRUD::Model::Utils );
 use CatalystX::CRUD::Iterator;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
@@ -284,7 +284,8 @@ sub treat_like_int {
     # treat wildcard timestamps like ints not text (>= instead of ILIKE)
     for my $name (@$col_names) {
         my $col = $self->name->meta->column($name);
-        $self->{_treat_like_int}->{$name} = $col->type =~ m/^date(time)?$/;
+        $self->{_treat_like_int}->{$name} = 1
+            if $col->type =~ m/^date(time)?$/;
     }
 
     return $self->{_treat_like_int};

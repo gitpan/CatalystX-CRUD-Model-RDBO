@@ -35,3 +35,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.10    29 Jan 2008
         * made RDBO debugging depedent on CATALYST_DEBUG > 1
 
+0.11    06 Feb 2008
+        * fix bug with calculating treat_like_int(). Only set in hash if matches.
+
