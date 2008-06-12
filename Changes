@@ -38,3 +38,7 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.11    06 Feb 2008
         * fix bug with calculating treat_like_int(). Only set in hash if matches.
 
+0.12    12 June 2008
+        * add ::Manager::Debug to debugging option
+        * add 'boolean' to _treat_like_int match
+

@@ -3,10 +3,11 @@ use strict;
 use warnings;
 use base qw( CatalystX::CRUD::Model CatalystX::CRUD::Model::Utils );
 use CatalystX::CRUD::Iterator;
+use Class::C3;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
-__PACKAGE__->mk_ro_accessors(qw( name manager ));
+__PACKAGE__->mk_ro_accessors(qw( name manager treat_like_int ));
 __PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
 
 =head1 NAME
@@ -63,7 +64,7 @@ name() and manager() values based on config().
 sub Xsetup {
     my $self = shift;
 
-    $self->NEXT::Xsetup(@_);
+    $self->next::method(@_);
 
     $self->{name} = $self->config->{name};
     if ( !$self->name ) {
@@ -87,6 +88,9 @@ sub Xsetup {
     # rdbo sql uses 'ne' for not equal
     $self->ne_sign('ne');
 
+    # cache the treat_like_int hash
+    $self->_treat_like_int;
+
     # load the Manager
     eval "require $mgr";
 
@@ -100,6 +104,7 @@ sub Xsetup {
     if ( $ENV{CATALYST_DEBUG} && $ENV{CATALYST_DEBUG} > 1 ) {
         $Rose::DB::Object::QueryBuilder::Debug = 1;
         $Rose::DB::Object::Debug               = 1;
+        $Rose::DB::Object::Manager::Debug      = 1;
     }
 
 }
@@ -119,7 +124,7 @@ sub new_object {
         my $err = defined($obj) ? $obj->error : $@;
         return if $self->throw_error("can't create new $rdbo object: $err");
     }
-    return $self->NEXT::new_object( delegate => $obj );
+    return $self->next::method( delegate => $obj );
 }
 
 =head2 fetch( @params )
@@ -275,20 +280,21 @@ will get proper SQL rendering.
 
 =cut
 
-sub treat_like_int {
+sub _treat_like_int {
     my $self = shift;
-    return $self->{_treat_like_int} if $self->{_treat_like_int};
-    $self->{_treat_like_int} = {};
+    return $self->{treat_like_int} if $self->{treat_like_int};
+    $self->{treat_like_int} = {};
     my $col_names = $self->_get_field_names;
 
     # treat wildcard timestamps like ints not text (>= instead of ILIKE)
     for my $name (@$col_names) {
         my $col = $self->name->meta->column($name);
-        $self->{_treat_like_int}->{$name} = 1
-            if $col->type =~ m/^date(time)?$/;
+        if ( $col->type =~ m/date|time|boolean/ ) {
+            $self->{treat_like_int}->{$name} = 1;
+        }
     }
 
-    return $self->{_treat_like_int};
+    return $self->{treat_like_int};
 }
 
 sub make_query {
