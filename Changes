@@ -42,3 +42,8 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * add ::Manager::Debug to debugging option
         * add 'boolean' to _treat_like_int match
 
+0.13    23 Aug 2008
+        * support new *_related methods in core API
+
+
+

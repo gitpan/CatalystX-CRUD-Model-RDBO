@@ -13,4 +13,10 @@ t/lib/My/Foo.pm
 t/lib/MyApp.pm
 t/lib/MyApp/Model/Foo.pm
 t/lib/MyApp/Object.pm
+t/lib/My/Bar.pm
+t/lib/My/DB.pm
+t/lib/My/FooBar.pm
+t/lib/MyApp/Controller/Foo.pm
+t/lib/MyApp/Form/Foo.pm
+t/lib/MyApp/Model/Bar.pm
 META.yml                                 Module meta-data (added by MakeMaker)

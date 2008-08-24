@@ -4,11 +4,13 @@ use warnings;
 use base qw( CatalystX::CRUD::Model CatalystX::CRUD::Model::Utils );
 use CatalystX::CRUD::Iterator;
 use Class::C3;
+use Carp;
+use Data::Dump qw( dump );
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager treat_like_int ));
-__PACKAGE__->config->{object_class} = 'CatalystX::CRUD::Object::RDBO';
+__PACKAGE__->config( object_class => 'CatalystX::CRUD::Object::RDBO' );
 
 =head1 NAME
 
@@ -252,6 +254,125 @@ sub iterator {
     my $self = shift;
     my $iter = $self->_get_objects( 'get_objects_iterator', @_ );
     return CatalystX::CRUD::Iterator->new( $iter, $self->object_class );
+}
+
+=head2 search_related( I<obj>, I<relationship> )
+
+Implements required method. Returns array or array ref based on calling
+context, for objects related to I<obj> via I<relationship>. I<relationship>
+should be a method name callable on I<obj>.
+
+=head2 iterator_related( I<obj>, I<relationship> )
+
+Like search_related() but returns an iterator.
+
+=head2 count_related( I<obj>, I<relationship> )
+
+Like search_related() but returns an integer.
+
+=cut
+
+sub search_related {
+    my ( $self, $obj, $rel ) = @_;
+    return $obj->$rel;
+}
+
+sub iterator_related {
+    my ( $self, $obj, $rel ) = @_;
+    my $method = $rel . '_iterator';
+    return $obj->$method;
+}
+
+sub count_related {
+    my ( $self, $obj, $rel ) = @_;
+    my $method = $rel . '_count';
+    return $obj->$method;
+}
+
+=head2 add_related( I<obj>, I<rel_name>, I<foreign_value> )
+
+Associate foreign object identified by I<foreign_value> with I<obj>
+via the relationship I<rel_name>.
+
+B<CAUTION:> For many-to-many relationships only.
+
+=head2 rm_related( I<obj>, I<rel_name>, I<foreign_value> )
+
+Dissociate foreign object identified by I<foreign_value> from I<obj>
+via the relationship I<rel_name>.
+
+B<CAUTION:> For many-to-many relationships only.
+
+=cut
+
+sub _get_rel_meta {
+    my ( $self, $obj, $rel_name ) = @_;
+
+    my $rel = $self->has_relationship( $obj, $rel_name )
+        or $self->throw_error("no such relationship $rel_name");
+
+    if ( $rel->isa('Rose::DB::Object::Metadata::Relationship::ManyToMany') ) {
+
+        my $map_class = $rel->map_class;
+        my $mcm       = $map_class->meta;
+        my @map_to    = $mcm->relationship( $rel->map_to )->column_map;
+        my @map_from  = $mcm->relationship( $rel->map_from )->column_map;
+        my %m         = (
+            map_to    => \@map_to,
+            map_from  => \@map_from,
+            map_class => $map_class,
+        );
+
+        #carp dump \%m;
+
+        return \%m;
+
+    }
+    else {
+        $self->throw_error( "unsupport relationship type: " . ref($rel) );
+    }
+}
+
+=head2 has_relationship( I<obj>, I<rel_name> )
+
+Returns the Rose::DB::Object::Metadata::Relationship instance
+for I<rel_name> if it exists, or undef if it does not.
+
+=cut
+
+sub has_relationship {
+    my ( $self, $obj, $rel_name ) = @_;
+    return $obj->meta->relationship($rel_name);
+}
+
+sub add_related {
+    my ( $self, $obj, $rel_name, $fk_val ) = @_;
+    my $addmethod = 'add_' . $rel_name;
+    my $meta      = $self->_get_rel_meta( $obj, $rel_name );
+    my $fpk       = $meta->{map_to}->[1];
+    $obj->$addmethod( { $fpk => $fk_val } );
+    $obj->save;
+}
+
+sub rm_related {
+    my ( $self, $obj, $rel_name, $fk_val ) = @_;
+
+    my $meta = $self->_get_rel_meta( $obj, $rel_name );
+    my $obj_method
+        = $obj->meta->column_accessor_method_name( $meta->{map_from}->[1] );
+    my $query = [
+        $meta->{map_from}->[0] => $obj->$obj_method,
+        $meta->{map_to}->[0]   => $fk_val,
+    ];
+
+    #carp dump $query;
+
+    $self->manager->delete_objects(
+        object_class => $meta->{map_class},
+        where        => $query,
+    );
+    $obj->forget_related($rel_name);
+    return $obj;
 }
 
 =head2 make_query( I<field_names> )
