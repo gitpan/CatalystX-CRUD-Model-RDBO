@@ -7,7 +7,7 @@ use Class::C3;
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager treat_like_int ));
 __PACKAGE__->config( object_class => 'CatalystX::CRUD::Object::RDBO' );
@@ -272,21 +272,43 @@ Like search_related() but returns an integer.
 
 =cut
 
+sub _related_query {
+    my ( $self, $obj, $rel_name ) = @_;
+    my $relationship = $self->has_relationship( $obj, $rel_name )
+        or $self->throw_error("no relationship for $rel_name");
+
+    # set the param so sort is correctly mangled in make_query()
+    if ($relationship->isa(
+            'Rose::DB::Object::Metadata::Relationship::ManyToMany')
+        )
+    {
+        $self->context->req->params->{'cxc-m2m'} = 1;
+    }
+    my $query = $self->make_query;
+    my @arg;
+    for (qw( limit offset sort_by )) {
+        if ( exists $query->{$_} and length $query->{$_} ) {
+            push( @arg, $_ => $query->{$_} );
+        }
+    }
+    return @arg;
+}
+
 sub search_related {
     my ( $self, $obj, $rel ) = @_;
-    return $obj->$rel;
+    return $obj->$rel( $self->_related_query( $obj, $rel ) );
 }
 
 sub iterator_related {
     my ( $self, $obj, $rel ) = @_;
     my $method = $rel . '_iterator';
-    return $obj->$method;
+    return $obj->$method( $self->_related_query( $obj, $rel ) );
 }
 
 sub count_related {
     my ( $self, $obj, $rel ) = @_;
     my $method = $rel . '_count';
-    return $obj->$method;
+    return $obj->$method( $self->_related_query( $obj, $rel ) );
 }
 
 =head2 add_related( I<obj>, I<rel_name>, I<foreign_value> )
@@ -352,6 +374,9 @@ sub add_related {
     my $fpk       = $meta->{map_to}->[1];
     $obj->$addmethod( { $fpk => $fk_val } );
     $obj->save;
+
+    # so next access reflects change.
+    $obj->forget_related($rel_name);
 }
 
 sub rm_related {
@@ -371,6 +396,8 @@ sub rm_related {
         object_class => $meta->{map_class},
         where        => $query,
     );
+
+    # so next access reflects change
     $obj->forget_related($rel_name);
     return $obj;
 }
@@ -410,12 +437,19 @@ sub _treat_like_int {
     # treat wildcard timestamps like ints not text (>= instead of ILIKE)
     for my $name (@$col_names) {
         my $col = $self->name->meta->column($name);
-        if ( $col->type =~ m/date|time|boolean/ ) {
+        if ( $col->type =~ m/date|time|boolean|int/ ) {
             $self->{treat_like_int}->{$name} = 1;
         }
     }
 
     return $self->{treat_like_int};
+}
+
+sub _join_with_table_prefix {
+    my ( $self, $q, $prefix ) = @_;
+    return join( ' ',
+        map { $prefix . '.' . $_->[0], $_->[1] }
+            map { [%$_] } @{ $q->{sort_order} } );
 }
 
 sub make_query {
@@ -424,9 +458,21 @@ sub make_query {
     my $field_names = shift || $self->_get_field_names;
     my $q           = $self->make_sql_query($field_names);
 
-    # dis-ambiguate common column names
-    $q->{sort_by} =~ s,\bname\ ,t1.name ,;
-    $q->{sort_by} =~ s,\bid\ ,t1.id ,;
+    # many2many relationships always have two tables,
+    # and we are sorting my the 2nd one. The 1st one is the mapper.
+    if ( $c->req->params->{'cxc-m2m'} ) {
+        if ( length( $q->{sort_by} ) and !( $q->{sort_by} =~ m/t\d\./ ) ) {
+            $q->{sort_by} = $self->_join_with_table_prefix( $q, 't2' );
+        }
+    }
+    else {
+        if ( length( $q->{sort_by} ) and !( $q->{sort_by} =~ m/t\d\./ ) ) {
+            $q->{sort_by} = $self->_join_with_table_prefix( $q, 't1' );
+        }
+    }
+
+    $c->log->debug("make_query: WHERE $q->{query_obj} ORDER BY $q->{sort_by}")
+        if $c->debug;
 
     return $q;
 }

@@ -45,5 +45,12 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.13    23 Aug 2008
         * support new *_related methods in core API
 
+0.14    11 Sept 2008
+        * fix add_related() to forget_related() after save, so that next access reflects the addition.
+        * move column sort disambiguation from CatalystX::CRUD::YUI::Controller to here.
+        * support for 0.30 core api param name change
+        * add 'int' to column types registered as 'treat_like_int'
+        * fix query for _related methods.
+        * update tests to support new make_sql_query() format in core API
 
 

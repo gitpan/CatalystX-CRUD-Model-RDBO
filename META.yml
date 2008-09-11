@@ -1,10 +1,13 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         CatalystX-CRUD-Model-RDBO
-version:      0.13
-version_from: lib/CatalystX/CRUD/Model/RDBO.pm
-installdirs:  site
-requires:
+--- #YAML:1.0
+name:                CatalystX-CRUD-Model-RDBO
+version:             0.14
+abstract:            ~
+license:             ~
+author:              
+    - Peter Karman <karman@cpan.org>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
     Catalyst::Runtime:             0
     CatalystX::CRUD:               0.29
     Data::Dump:                    0
@@ -12,6 +15,6 @@ requires:
     Rose::DBx::Object::MoreHelpers: 0
     Rose::DBx::TestDB:             0
     Test::More:                    0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
