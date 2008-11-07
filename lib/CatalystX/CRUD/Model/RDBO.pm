@@ -7,9 +7,9 @@ use Class::C3;
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
-__PACKAGE__->mk_ro_accessors(qw( name manager treat_like_int ));
+__PACKAGE__->mk_ro_accessors(qw( name manager treat_like_int load_with ));
 __PACKAGE__->config( object_class => 'CatalystX::CRUD::Object::RDBO' );
 
 =head1 NAME
@@ -173,9 +173,6 @@ sub fetch {
         my $ret;
         my $name = $self->name;
         my @arg  = ();
-        if ( $self->config->{load_with} ) {
-            push( @arg, with => $self->config->{load_with} );
-        }
         eval { $ret = $obj->read(@arg); };
         if ( $@ or !$ret ) {
             return
@@ -497,9 +494,9 @@ sub _get_objects {
 
     push(
         @params,
-        with_objects  => $self->config->{load_with},
+        with_objects  => $self->load_with,
         multi_many_ok => 1
-    ) if $self->config->{load_with};
+    ) if $self->load_with;
 
     return $manager->$method(@params);
 }

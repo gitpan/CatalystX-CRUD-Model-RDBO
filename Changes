@@ -53,4 +53,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * fix query for _related methods.
         * update tests to support new make_sql_query() format in core API
 
+0.15    7 Nov 2008
+        * (finally) fix load_with to be a real ro_accessor and only used in _get_objects()
 
