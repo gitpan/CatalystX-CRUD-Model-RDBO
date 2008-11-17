@@ -56,3 +56,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.15    7 Nov 2008
         * (finally) fix load_with to be a real ro_accessor and only used in _get_objects()
 
+0.16    17 Nov 2008
+        * pass query if present in *_related() query methods
+

@@ -7,7 +7,7 @@ use Class::C3;
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 __PACKAGE__->mk_ro_accessors(qw( name manager treat_like_int load_with ));
 __PACKAGE__->config( object_class => 'CatalystX::CRUD::Object::RDBO' );
@@ -283,6 +283,9 @@ sub _related_query {
     }
     my $query = $self->make_query;
     my @arg;
+    if ( @{ $query->{query} } ) {
+        @arg = ( query => $query->{query} );
+    }
     for (qw( limit offset sort_by )) {
         if ( exists $query->{$_} and length $query->{$_} ) {
             push( @arg, $_ => $query->{$_} );
