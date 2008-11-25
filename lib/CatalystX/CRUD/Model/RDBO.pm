@@ -7,9 +7,10 @@ use Class::C3;
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
-__PACKAGE__->mk_ro_accessors(qw( name manager treat_like_int load_with ));
+__PACKAGE__->mk_ro_accessors(
+    qw( name manager treat_like_int load_with related_load_with ));
 __PACKAGE__->config( object_class => 'CatalystX::CRUD::Object::RDBO' );
 
 =head1 NAME
@@ -21,10 +22,13 @@ CatalystX::CRUD::Model::RDBO - Rose::DB::Object CRUD
  package MyApp::Model::Foo;
  use base qw( CatalystX::CRUD::Model::RDBO );
  __PACKAGE__->config( 
-            name            => 'My::RDBO::Foo', 
-            manager         => 'My::RDBO::Foo::Manager',
-            load_with       => [qw( bar )],
-            page_size       => 50,
+            name                => 'My::RDBO::Foo', 
+            manager             => 'My::RDBO::Foo::Manager',
+            load_with           => [qw( bar )],
+            related_load_with   => {
+                bars => ['doof']
+            },
+            page_size           => 50,
             );
  1;
 
@@ -53,6 +57,19 @@ This assumes the namespace convention of Rose::DB::Object::Manager.
 
 If there is no such module in your @INC path, then
 the fall-back default is Rose::DB::Object::Manager.
+
+=head2 load_with
+
+The value of C<load_with> should be an array ref of relationship
+names. The array ref is passed into all the Manager
+get_objects* methods as the C<with_objects> value.
+
+=head2 related_load_with
+
+Similar to C<load_with>, but the C<with_objects> argument is passed
+in all the *_related methods. The C<related_load_with> value should
+be a hash ref with keys using relationships names and the values
+being array refs of relationship names in the foreign (related) classes.
 
 =cut
 
@@ -291,6 +308,16 @@ sub _related_query {
             push( @arg, $_ => $query->{$_} );
         }
     }
+    if ( $self->related_load_with
+        && exists $self->related_load_with->{$rel_name} )
+    {
+        push(
+            @arg,
+            with_objects  => $self->related_load_with->{$rel_name},
+            multi_many_ok => 1
+        );
+    }
+    #warn dump \@arg;
     return @arg;
 }
 
