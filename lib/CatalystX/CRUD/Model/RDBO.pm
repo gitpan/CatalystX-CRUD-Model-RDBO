@@ -7,7 +7,7 @@ use Class::C3;
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -317,6 +317,7 @@ sub _related_query {
             multi_many_ok => 1
         );
     }
+
     #warn dump \@arg;
     return @arg;
 }
@@ -487,14 +488,18 @@ sub make_query {
 
     # many2many relationships always have two tables,
     # and we are sorting my the 2nd one. The 1st one is the mapper.
-    if ( $c->req->params->{'cxc-m2m'} ) {
-        if ( length( $q->{sort_by} ) and !( $q->{sort_by} =~ m/t\d\./ ) ) {
-            $q->{sort_by} = $self->_join_with_table_prefix( $q, 't2' );
+    # however, we leave sort_by alone if it already has . in it,
+    # since then we assume the request knew enough to ask.
+    if ( length( $q->{sort_by} ) && !( $q->{sort_by} =~ m/\./ ) ) {
+        if ( $c->req->params->{'cxc-m2m'} ) {
+            if ( !( $q->{sort_by} =~ m/t\d\./ ) ) {
+                $q->{sort_by} = $self->_join_with_table_prefix( $q, 't2' );
+            }
         }
-    }
-    else {
-        if ( length( $q->{sort_by} ) and !( $q->{sort_by} =~ m/t\d\./ ) ) {
-            $q->{sort_by} = $self->_join_with_table_prefix( $q, 't1' );
+        else {
+            if ( !( $q->{sort_by} =~ m/t\d\./ ) ) {
+                $q->{sort_by} = $self->_join_with_table_prefix( $q, 't1' );
+            }
         }
     }
 

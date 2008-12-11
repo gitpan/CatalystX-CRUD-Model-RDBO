@@ -62,3 +62,7 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.17    25 Nov 2008
         * added related_load_with() feature and docs for it and load_with().
 
+0.18    11 Dec 2008
+        * fix logic for mangling sort_by with table prefix. If the sort_by value already has a . (dot)
+          in it, assume the request knew what it was doing.
+
