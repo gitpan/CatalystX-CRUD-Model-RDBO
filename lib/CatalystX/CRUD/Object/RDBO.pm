@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use base qw( CatalystX::CRUD::Object );
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ Calls load( speculative => 1 ) on the internal delegate() value.
 
 # convenience methods
 sub load_speculative {
-    shift->delegate->load( speculative => 1 );
+    shift->delegate->load( speculative => 1, @_ );
 }
 
 =head2 create
@@ -58,7 +58,16 @@ use load_speculative() instead.
 =cut
 
 sub read {
-    shift->delegate->load(@_);
+
+    # because of the abusive way RDBO handles load() internally,
+    # must re-assign to delegate afterwards. This fixes esp the issue
+    # of passing 'with' => 'rel' to load().
+
+    my $cxcobj = shift;
+    my $rdbo   = $cxcobj->delegate;
+    $rdbo->load(@_);
+    $cxcobj->{delegate} = $rdbo;
+    return $cxcobj;
 }
 
 =head2 update

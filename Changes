@@ -66,3 +66,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * fix logic for mangling sort_by with table prefix. If the sort_by value already has a . (dot)
           in it, assume the request knew what it was doing.
 
+0.19    12 Dec 2008
+        * fix long-standing issue with passing additional args to load() via CXC::Object::RDBO->read
+
