@@ -13,6 +13,8 @@ use Catalyst::Test 'MyApp';
 use Data::Dump qw( dump );
 use HTTP::Request::Common;
 
+diag("testing against Catalyst-Runtime version " . $Catalyst::Runtime::VERSION);
+
 ok( my $res = request('/foo/test'), "get /foo/test" );
 
 #dump $res->headers;
