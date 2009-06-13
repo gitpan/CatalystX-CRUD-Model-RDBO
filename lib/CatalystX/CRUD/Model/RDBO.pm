@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -412,8 +412,8 @@ sub rm_related {
     my ( $self, $obj, $rel_name, $fk_val ) = @_;
 
     my $meta = $self->_get_rel_meta( $obj, $rel_name );
-    my $obj_method
-        = $obj->delegate->meta->column_accessor_method_name( $meta->{map_from}->[1] );
+    my $obj_method = $obj->delegate->meta->column_accessor_method_name(
+        $meta->{map_from}->[1] );
     my $query = [
         $meta->{map_from}->[0] => $obj->$obj_method,
         $meta->{map_to}->[0]   => $fk_val,
@@ -476,8 +476,8 @@ sub _treat_like_int {
 
 sub _join_with_table_prefix {
     my ( $self, $q, $prefix ) = @_;
-    return join( ' ',
-        map { $prefix . '.' . $_->[0], $_->[1] }
+    return join( ', ',
+        map     { $prefix . '.' . $_->[0] . ' ' . $_->[1] }
             map { [%$_] } @{ $q->{sort_order} } );
 }
 

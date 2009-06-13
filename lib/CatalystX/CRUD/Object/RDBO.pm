@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use base qw( CatalystX::CRUD::Object );
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 =head1 NAME
 

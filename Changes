@@ -73,3 +73,7 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * switch to MRO::Compat from Class::C3
         * fixes for CatalystX::CRUD 0.43
 
+0.21    13 June 2009
+        * fix multiple ORDER BY columns with comma-join (see RT 46904)
+        * explicitly call ->delegate->meta to fix moosification issue with Catalyst 5.8x
+
