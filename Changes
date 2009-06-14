@@ -77,3 +77,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
         * fix multiple ORDER BY columns with comma-join (see RT 46904)
         * explicitly call ->delegate->meta to fix moosification issue with Catalyst 5.8x
 
+0.22    13 June 2009
+        * fix tests for UPPERCASE normalize in newer Sort::SQL of ORDER BY string direction
+

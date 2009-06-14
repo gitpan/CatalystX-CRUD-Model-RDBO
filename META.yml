@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               CatalystX-CRUD-Model-RDBO
-version:            0.21
+version:            0.22
 abstract:           ~
 author:
     - Peter Karman <karman@cpan.org>
@@ -17,6 +17,7 @@ requires:
     Rose::DB::Object:     0
     Rose::DBx::Object::MoreHelpers:  0
     Rose::DBx::TestDB:    0
+    Sort::SQL:            0.05
     Test::More:           0
 no_index:
     directory:

@@ -105,8 +105,8 @@ is_deeply(
         plain_query     => { id => [1] },
         plain_query_str => "(id='1')",
         query           => [ "id", 1 ],
-        sort_by         => "t1.id desc, t1.name asc",
-        sort_order      => [ { id => "desc" }, { name => "asc" } ],
+        sort_by         => "t1.id DESC, t1.name ASC",
+        sort_order      => [ { id => "DESC" }, { name => "ASC" } ],
     },
     "multi-sort content"
 );
