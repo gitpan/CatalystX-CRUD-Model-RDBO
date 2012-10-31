@@ -20,4 +20,5 @@ t/lib/MyApp/Controller/Foo.pm
 t/lib/MyApp/Form/Foo.pm
 t/lib/MyApp/Model/Bar.pm
 t/lib/MyApp/Base/RDBO.pm
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

@@ -28,7 +28,7 @@ is( $res->headers->{status}, 200, "get 200" );
 
 ok( $res = request('/foo/1/bars/2/add'), "GET /foo/1/bars/2/add" );
 
-is( $res->headers->{status}, 400, "cannot GET add related" );
+is( $res->headers->{status}, 405, "cannot GET add related" );
 
 # add a new foobar
 ok( $res = request( POST( '/foo/1/bars/2/add', [] ) ),

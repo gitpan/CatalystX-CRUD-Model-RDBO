@@ -80,3 +80,5 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.22    13 June 2009
         * fix tests for UPPERCASE normalize in newer Sort::SQL of ORDER BY string direction
 
+0.23    31 Oct 2012
+        * add find_related() method

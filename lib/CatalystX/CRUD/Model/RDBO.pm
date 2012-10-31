@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -340,6 +340,25 @@ sub count_related {
     return $obj->$method( $self->_related_query( $obj, $rel ) );
 }
 
+=head2 find_related( I<obj>, I<relationship>, I<foreign_value> )
+
+Implements required method. Returns array or array ref based on calling
+context, for objects related to I<obj> via I<relationship>
+that match I<foreign_value>. I<relationship>
+should be a method name callable on I<obj>.
+
+=cut
+
+sub find_related {
+    my ( $self, $obj, $rel, $foreign_pk_value ) = @_;
+    my $method = 'find_' . $rel;
+    my $meta   = $self->_get_rel_meta( $obj, $rel );
+    my $fpk    = $meta->{map_to}->[1];
+    my $args   = [ $fpk => $foreign_pk_value ];
+    my $r      = $obj->$method( query => $args );
+    return $r;
+}
+
 =head2 add_related( I<obj>, I<rel_name>, I<foreign_value> )
 
 Associate foreign object identified by I<foreign_value> with I<obj>
@@ -379,6 +398,15 @@ sub _get_rel_meta {
         return \%m;
 
     }
+    elsif ( $rel->isa('Rose::DB::Object::Metadata::Relationship::OneToMany') )
+    {
+        my $column_map = $rel->column_map;
+        my %m          = (
+            map_to => [ reverse %$column_map ],    # yes, coerce into array
+        );
+        return \%m;
+
+    }
     else {
         $self->throw_error( "unsupport relationship type: " . ref($rel) );
     }
@@ -393,6 +421,9 @@ for I<rel_name> if it exists, or undef if it does not.
 
 sub has_relationship {
     my ( $self, $obj, $rel_name ) = @_;
+    if ( !$obj ) {
+        $self->throw_error("obj not defined");
+    }
     return $obj->delegate->meta->relationship($rel_name);
 }
 
@@ -477,8 +508,8 @@ sub _treat_like_int {
 sub _join_with_table_prefix {
     my ( $self, $q, $prefix ) = @_;
     return join( ', ',
-        map     { $prefix . '.' . $_->[0] . ' ' . $_->[1] }
-            map { [%$_] } @{ $q->{sort_order} } );
+        map { $prefix . '.' . $_->[0] . ' ' . $_->[1] }
+        map { [%$_] } @{ $q->{sort_order} } );
 }
 
 sub make_query {
