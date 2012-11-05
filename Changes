@@ -86,3 +86,5 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.24    5 Nov 2012
         * add tests for CatalystX::CRUD::Controller::REST
 
+0.25    5 Nov 2012
+        * fix skip test count for t/02-rest

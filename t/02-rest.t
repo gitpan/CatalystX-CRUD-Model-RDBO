@@ -16,7 +16,7 @@ SKIP: {
     eval { require CatalystX::CRUD::Controller::REST; use JSON; };
     if ($@) {
         warn "$@";
-        skip "CatalystX::CRUD::Controller::REST not installed", 18;
+        skip "CatalystX::CRUD::Controller::REST not installed", 21;
     }
 
     use lib qw( t/lib );
