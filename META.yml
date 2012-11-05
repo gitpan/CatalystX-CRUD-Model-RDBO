@@ -19,11 +19,11 @@ no_index:
     - inc
 requires:
   Catalyst::Runtime: 5.8
-  CatalystX::CRUD: 0.53
+  CatalystX::CRUD: 0.54
   Data::Dump: 0
   Rose::DB::Object: 0
   Rose::DBx::Object::MoreHelpers: 0
   Rose::DBx::TestDB: 0
   Sort::SQL: 0.05
   Test::More: 0
-version: 0.23
+version: 0.24

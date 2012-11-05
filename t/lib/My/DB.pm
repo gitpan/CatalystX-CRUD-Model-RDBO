@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use base qw( Rose::DB );
 use Carp;
+use Rose::DBx::TestDB;
 
 # create a temp db
 my $db = Rose::DBx::TestDB->new;

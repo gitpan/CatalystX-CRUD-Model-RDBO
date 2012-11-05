@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -356,7 +356,13 @@ sub find_related {
     my $fpk    = $meta->{map_to}->[1];
     my $args   = [ $fpk => $foreign_pk_value ];
     my $r      = $obj->$method( query => $args );
-    return $r;
+
+    # save ourselves lots of method-call overhead.
+    my $class = $self->object_class;
+
+    # delegate
+    my @wrapped = map { $class->new( delegate => $_ ) } @$r;
+    return wantarray ? @wrapped : \@wrapped;
 }
 
 =head2 add_related( I<obj>, I<rel_name>, I<foreign_value> )
@@ -433,10 +439,12 @@ sub add_related {
     my $meta      = $self->_get_rel_meta( $obj, $rel_name );
     my $fpk       = $meta->{map_to}->[1];
     $obj->$addmethod( { $fpk => $fk_val } );
-    $obj->save;
+    my $rt = $obj->save;
 
     # so next access reflects change.
     $obj->forget_related($rel_name);
+
+    return $rt;
 }
 
 sub rm_related {

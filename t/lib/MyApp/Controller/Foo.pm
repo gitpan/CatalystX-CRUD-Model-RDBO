@@ -23,7 +23,7 @@ sub test : Local {
 
     my $thing = $c->model('Foo')->new_object( id => 1 );
 
-    for my $m (qw( create read update delete)) {
+    for my $m (qw( create read update delete )) {
         croak unless $thing->can($m);
     }
 

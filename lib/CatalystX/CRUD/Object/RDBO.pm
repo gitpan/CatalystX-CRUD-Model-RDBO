@@ -3,7 +3,11 @@ use strict;
 use warnings;
 use base qw( CatalystX::CRUD::Object );
 
-our $VERSION = '0.23';
+# help for serialize()
+use Rose::DB::Object::Helpers qw( column_values_as_json );
+use JSON;
+
+our $VERSION = '0.24';
 
 =head1 NAME
 
@@ -88,6 +92,27 @@ Calls delegate->delete(@_).
 
 sub delete {
     shift->delegate->delete(@_);
+}
+
+=head2 is_new
+
+Calls not_found() on the RDBO delegate.
+
+=cut
+
+sub is_new {
+    shift->delegate->not_found();
+}
+
+=head2 serialize
+
+Returns column/value pairs for RDBO delegate with all DateTime
+et al objects serialized to strings.
+
+=cut
+
+sub serialize {
+    return decode_json( column_values_as_json( shift->delegate ) );
 }
 
 1;

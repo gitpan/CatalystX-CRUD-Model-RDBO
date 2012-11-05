@@ -82,3 +82,7 @@ Revision history for CatalystX-CRUD-Model-RDBO
 
 0.23    31 Oct 2012
         * add find_related() method
+
+0.24    5 Nov 2012
+        * add tests for CatalystX::CRUD::Controller::REST
+

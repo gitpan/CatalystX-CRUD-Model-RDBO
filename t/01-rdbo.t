@@ -1,3 +1,6 @@
+#!/usr/bin/env perl
+use strict;
+
 use Test::More tests => 22;
 
 BEGIN {
