@@ -20,7 +20,6 @@ t/lib/MyApp/Form/Foo.pm
 t/lib/MyApp/Model/Bar.pm
 t/lib/MyApp/Model/Foo.pm
 t/lib/MyApp/Object.pm
-t/lib/MyApp/script/myapp_server.pl
 t/pod-coverage.t
 t/pod.t
 META.yml                                 Module YAML meta-data (added by MakeMaker)

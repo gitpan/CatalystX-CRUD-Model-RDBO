@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -325,13 +325,17 @@ sub _related_query {
 
 sub search_related {
     my ( $self, $obj, $rel ) = @_;
-    return $obj->$rel( $self->_related_query( $obj, $rel ) );
+    return CatalystX::CRUD::Iterator->new(
+        $obj->$rel( $self->_related_query( $obj, $rel ) ),
+        $self->object_class );
 }
 
 sub iterator_related {
     my ( $self, $obj, $rel ) = @_;
     my $method = $rel . '_iterator';
-    return $obj->$method( $self->_related_query( $obj, $rel ) );
+    return CatalystX::CRUD::Iterator->new(
+        $obj->$method( $self->_related_query( $obj, $rel ) ),
+        $self->object_class );
 }
 
 sub count_related {

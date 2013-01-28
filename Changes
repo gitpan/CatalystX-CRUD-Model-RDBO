@@ -88,3 +88,7 @@ Revision history for CatalystX-CRUD-Model-RDBO
 
 0.25    5 Nov 2012
         * fix skip test count for t/02-rest
+
+0.26    28 Jan 2013
+        * wrap RDBO::Iterator in CXC::Iterator for search_related() and iterator_related() methods.
+
