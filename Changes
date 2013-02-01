@@ -92,3 +92,5 @@ Revision history for CatalystX-CRUD-Model-RDBO
 0.26    28 Jan 2013
         * wrap RDBO::Iterator in CXC::Iterator for search_related() and iterator_related() methods.
 
+0.27    31 Jan 2013
+        * explicitly require JSON dependency for Helpers
