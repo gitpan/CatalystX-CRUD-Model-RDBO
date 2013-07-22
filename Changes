@@ -94,3 +94,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
 
 0.27    31 Jan 2013
         * explicitly require JSON dependency for Helpers
+
+0.28    22 July 2013
+        * do not attempt to sort related objects till column name api can be figured out r14454

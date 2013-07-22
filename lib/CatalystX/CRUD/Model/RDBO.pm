@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -304,7 +304,7 @@ sub _related_query {
     if ( @{ $query->{query} } ) {
         @arg = ( query => $query->{query} );
     }
-    for (qw( limit offset sort_by )) {
+    for (qw( limit offset )) {
         if ( exists $query->{$_} and length $query->{$_} ) {
             push( @arg, $_ => $query->{$_} );
         }
@@ -531,7 +531,7 @@ sub make_query {
     my $q           = $self->make_sql_query($field_names);
 
     # many2many relationships always have two tables,
-    # and we are sorting my the 2nd one. The 1st one is the mapper.
+    # and we are sorting by the 2nd one. The 1st one is the mapper.
     # however, we leave sort_by alone if it already has . in it,
     # since then we assume the request knew enough to ask.
     if ( length( $q->{sort_by} ) && !( $q->{sort_by} =~ m/\./ ) ) {
