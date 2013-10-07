@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -304,7 +304,10 @@ sub _related_query {
     if ( @{ $query->{query} } ) {
         @arg = ( query => $query->{query} );
     }
-    for (qw( limit offset )) {
+    for (qw( limit offset sort_by )) {
+        if ( $self->context->req->params->{'cxc-m2m'} and $_ eq 'sort_by' ) {
+            next;
+        }
         if ( exists $query->{$_} and length $query->{$_} ) {
             push( @arg, $_ => $query->{$_} );
         }

@@ -97,3 +97,6 @@ Revision history for CatalystX-CRUD-Model-RDBO
 
 0.28    22 July 2013
         * do not attempt to sort related objects till column name api can be figured out r14454
+
+0.29    07 Oct 2013
+        * re-enable sort of related objects as long as they are o2m not m2m
