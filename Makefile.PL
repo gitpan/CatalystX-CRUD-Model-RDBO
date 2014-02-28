@@ -14,7 +14,7 @@ WriteMakefile(
         'Data::Dump'                     => 0,      # for testing
         'Rose::DB::Object'               => 0,
         'Rose::DBx::Object::MoreHelpers' => 0,
-        'CatalystX::CRUD'                => 0.54,
+        'CatalystX::CRUD'                => 0.56,
         'Catalyst::Runtime'              => 5.8,
         'Rose::DBx::TestDB'              => 0,
         'Sort::SQL'                      => 0.05,
