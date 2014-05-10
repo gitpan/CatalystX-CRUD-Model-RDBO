@@ -1,5 +1,9 @@
 Revision history for CatalystX-CRUD-Model-RDBO
 
+0.301 10 May 2014
+ - skip related sort_by unless explicitly passed in cxc-* params
+   (fix for 0.29 r14454)
+
 0.30 28 Feb 2014
  - support for CXC 0.56
 

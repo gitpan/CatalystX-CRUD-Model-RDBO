@@ -7,7 +7,7 @@ use base qw( CatalystX::CRUD::Object );
 use Rose::DB::Object::Helpers qw( column_values_as_json );
 use JSON;
 
-our $VERSION = '0.30';
+our $VERSION = '0.301';
 
 =head1 NAME
 
@@ -140,6 +140,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * Mailing List
+
+L<https://groups.google.com/forum/#!forum/catalystxcrud>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 

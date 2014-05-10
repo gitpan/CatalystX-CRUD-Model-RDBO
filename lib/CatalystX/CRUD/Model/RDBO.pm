@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.30';
+our $VERSION = '0.301';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -289,6 +289,7 @@ Like search_related() but returns an integer.
 
 sub _related_query {
     my ( $self, $obj, $rel_name ) = @_;
+    my $c = $self->context;
     my $relationship = $self->has_relationship( $obj, $rel_name )
         or $self->throw_error("no relationship for $rel_name");
 
@@ -297,7 +298,7 @@ sub _related_query {
             'Rose::DB::Object::Metadata::Relationship::ManyToMany')
         )
     {
-        $self->context->req->params->{'cxc-m2m'} = 1;
+        $c->req->params->{'cxc-m2m'} = 1;
     }
     my $query = $self->make_query;
     my @arg;
@@ -305,9 +306,25 @@ sub _related_query {
         @arg = ( query => $query->{query} );
     }
     for (qw( limit offset sort_by )) {
-        if ( $self->context->req->params->{'cxc-m2m'} and $_ eq 'sort_by' ) {
-            next;
+
+        # only want to include the sort_by if it makes sense.
+        if ( $_ eq 'sort_by' ) {
+
+            # can't reliably predict table prefixes in a m2m.
+            # NOTE this effectively ignores whatever make_query did.
+            if ( $c->req->params->{'cxc-m2m'} ) {
+                next;
+            }
+
+            # if sort_by was derived from PK, it may refer to a parent table,
+            # not the related table. So skip it unless it was explicit.
+            if (    !$c->req->params->{'cxc-order'}
+                and !$c->req->params->{'cxc-sort'} )
+            {
+                next;
+            }
         }
+
         if ( exists $query->{$_} and length $query->{$_} ) {
             push( @arg, $_ => $query->{$_} );
         }
@@ -322,7 +339,8 @@ sub _related_query {
         );
     }
 
-    #warn dump \@arg;
+    $c->log->debug( "related_query: " . dump \@arg ) if $c->debug;
+
     return @arg;
 }
 
@@ -611,6 +629,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * Mailing List
+
+L<https://groups.google.com/forum/#!forum/catalystxcrud>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
