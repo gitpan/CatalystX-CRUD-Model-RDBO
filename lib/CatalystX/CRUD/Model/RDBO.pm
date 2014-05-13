@@ -8,7 +8,7 @@ use mro 'c3';
 use Carp;
 use Data::Dump qw( dump );
 
-our $VERSION = '0.301';
+our $VERSION = '0.302';
 
 __PACKAGE__->mk_ro_accessors(
     qw( name manager treat_like_int load_with related_load_with ));
@@ -376,11 +376,33 @@ should be a method name callable on I<obj>.
 
 sub find_related {
     my ( $self, $obj, $rel, $foreign_pk_value ) = @_;
+    my $relationship = $self->has_relationship( $obj, $rel )
+        or $self->throw_error("no relationship for $rel");
     my $method = 'find_' . $rel;
-    my $meta   = $self->_get_rel_meta( $obj, $rel );
-    my $fpk    = $meta->{map_to}->[1];
-    my $args   = [ $fpk => $foreign_pk_value ];
-    my $r      = $obj->$method( query => $args );
+    my $args;
+    if ($relationship->isa(
+            'Rose::DB::Object::Metadata::Relationship::ManyToMany')
+        )
+    {
+        my $meta = $self->_get_rel_meta( $obj, $rel );
+        $args = [ $meta->{map_to}->[1] => $foreign_pk_value ];
+    }
+    else {
+
+        # all the PKs and Unique cols for the foreign class, OR'd together.
+        my $pk_cols = $relationship->class->meta->primary_key_column_names;
+        my $uniq_cols = [ map {@$_}
+                @{ $relationship->class->meta->unique_keys_column_names } ];
+        $args = [
+            or => [
+                map { $_ => $foreign_pk_value } ( @$pk_cols, @$uniq_cols )
+            ]
+        ];
+    }
+
+    #dump $args;
+
+    my $r = $obj->$method( query => $args );
 
     # save ourselves lots of method-call overhead.
     my $class = $self->object_class;

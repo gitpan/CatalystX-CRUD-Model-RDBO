@@ -27,4 +27,4 @@ requires:
   Rose::DBx::TestDB: 0
   Sort::SQL: 0.05
   Test::More: 0
-version: 0.301
+version: 0.302

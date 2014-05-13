@@ -1,5 +1,9 @@
 Revision history for CatalystX-CRUD-Model-RDBO
 
+0.302 13 May 2014
+ - fix bug in find_related() where foreign table column name assumed to be
+   same as local table, esp for one-to-many relationships
+
 0.301 10 May 2014
  - skip related sort_by unless explicitly passed in cxc-* params
    (fix for 0.29 r14454)
